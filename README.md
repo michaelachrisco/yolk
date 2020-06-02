@@ -145,13 +145,13 @@ const router = new Router({ prefix: pathPrefix });
 
 // Creating the static file route for this router
 router.get("/static/:filePath", async (context) => {
-	const filePath = context.params.filePath;
-	let buffer;
-	try {
-		buffer = await Deno.readFile(path.join(__dirname, "static", filePath));
-	} catch (error) {}
-	
-	return context.response.body = buffer;
+    const filePath = context.params.filePath;
+    let buffer;
+    try {
+        buffer = await Deno.readFile(path.join(__dirname, "static", filePath));
+    } catch (error) {}
+    
+    return context.response.body = buffer;
 });
 
 /* Routes */
@@ -171,16 +171,16 @@ import { dbconfig } from "../../utilities/dbconfig.js";
 const dex = Dex({client: dbconfig.client, useNullAsDefault: true});
 
 export const models = [
-	dex.schema.createTable("mainUsers", (table) => {
-		table.increments("id").primary();
-		table.string("username");
-		table.string("hashedPassword");
-		table.string("firstname", 64);
-		table.string("lastname", 64);
-		table.string("email");
-		table.string("phoneNumber", 32);
-		table.timestamps(null, true);
-	}).toString(),
+    dex.schema.createTable("mainUsers", (table) => {
+        table.increments("id").primary();
+        table.string("username");
+        table.string("hashedPassword");
+        table.string("firstname", 64);
+        table.string("lastname", 64);
+        table.string("email");
+        table.string("phoneNumber", 32);
+        table.timestamps(null, true);
+    }).toString(),
 ]
 ```
 
@@ -280,7 +280,7 @@ Available Commands:
 
     createapplet <applet_name>
         "Creates an new applet with a specified name"
-	
+    
     migrate [drop]
         "Migrates all of the models in all of the applets. Add the drop"
         "parameter to drop the existing models in the database in the case"
