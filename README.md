@@ -304,20 +304,20 @@ Available Commands:
 
 ## Todo
 
-[x] Create project structure
-[x] Create applet structure
-[x] Create the Yolk CLI tool
-[x] Add rendering engine to the structure (Denjucks library)
-[x] Add database functionality to the structure (DenoDB library)
-[x] Add nodemon functionality to the structure (Denon library)
-[x] Add session middleware (Session library)
-[x] Add security middleware (Snelm library)
-[x] Add query string parsing middleware (Oak-Async-Query-Parser library)
-[x] Add logging middleware (Organ library)
-[ ] Add compression middleware
-[ ] Add CSRF middleware
-[ ] Add default 404 page
-[ ] Improve structure
+- [x] Create project structure
+- [x] Create applet structure
+- [x] Create the Yolk CLI tool
+- [x] Add rendering engine to the structure (Denjucks library)
+- [x] Add database functionality to the structure (DenoDB library)
+- [x] Add nodemon functionality to the structure (Denon library)
+- [x] Add session middleware (Session library)
+- [x] Add security middleware (Snelm library)
+- [x] Add query string parsing middleware (Oak-Async-Query-Parser library)
+- [x] Add logging middleware (Organ library)
+- [ ] Add compression middleware
+- [ ] Add CSRF middleware
+- [ ] Add default 404 page
+- [ ] Improve structure
 
 
 ## License
