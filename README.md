@@ -130,7 +130,6 @@ import { Router } from "https://deno.land/x/oak/mod.ts";
 import * as path from "https://deno.land/std/path/mod.ts";
 import denjucks from "https://deno.land/x/dinja/lib/denjucks/mod.js";
 import * as utilities from "../../utilities/util.js"
-import { database } from "../../server.js"
 import mainController from "./controllers/mainController.js";
 
 const __dirname = utilities.crossPlatformPathConversion(new URL(".", import.meta.url).pathname);
@@ -154,7 +153,7 @@ router.get("/static/:filePath", async (context) => {
     return context.response.body = buffer;
 });
 
-/* Routes */
+// Routes
 router.get("/", async (context) => {
     context.response.body = renderingEngine.render("index.html");
 });
@@ -165,23 +164,21 @@ export default router;
 * **/models** contains files for individual database models used throughout your web application and are typically imported by your controllers. Yolk CLI projects use the [DenoDB](https://deno.land/x/denodb) ORM library by default, and so models are created using this library.
 
 ```javascript
-import Dex from "https://deno.land/x/dinja/lib/dex/mod.ts";
-import { dbconfig } from "../../utilities/dbconfig.js";
+import { Model, DATA_TYPES } from 'https://deno.land/x/denodb/mod.ts';
 
-const dex = Dex({client: dbconfig.client, useNullAsDefault: true});
+export default class Users extends Model {
+    static table = 'mainUsers';
+    static timestamps = true;
 
-export const models = [
-    dex.schema.createTable("mainUsers", (table) => {
-        table.increments("id").primary();
-        table.string("username");
-        table.string("hashedPassword");
-        table.string("firstname", 64);
-        table.string("lastname", 64);
-        table.string("email");
-        table.string("phoneNumber", 32);
-        table.timestamps(null, true);
-    }).toString(),
-]
+    static fields = {
+        id: {
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        firstname: DATA_TYPES.STRING,
+        lastname: DATA_TYPES.STRING,
+    };
+}
 ```
 
 When you create models in the `/models` folder, you can migrate all of the models in all applets using the following command:
@@ -205,13 +202,15 @@ The **server.js** file contains all of the configurations for the server, the mi
 
 ```javascript
 import { Application } from "https://deno.land/x/oak/mod.ts";
-import Dexecutor from "https://deno.land/x/dexecutor/mod.ts";
+import { Database } from 'https://deno.land/x/denodb/mod.ts';
 import { dbconfig } from "./config/dbconfig.js";
 import { queryParserAsync } from "https://raw.githubusercontent.com/denjucks/oak-query-parser-async/master/mod.ts";
 import { Snelm } from "https://deno.land/x/snelm/mod.ts";
 import { Session } from "https://deno.land/x/session/mod.ts";
+import { organ } from "https://deno.land/x/organ/mod.ts";
 
 const app = new Application();
+
 
 /* Server configurations */
 let port = 55555;
@@ -221,11 +220,17 @@ if (Deno.args[0]) {
 
 
 /* Database */
-export const database = new Dexecutor(dbconfig);
-database.connect();
+const database = new Database(dbconfig.client, dbconfig.connection);
+app.use(async (context, next) => {
+    context.database = database;
+    await next();
+});
 
 
 /* Middleware */
+// Logging middleware
+app.use(organ());
+
 // Query Parser Middleware
 app.use(queryParserAsync());
 
