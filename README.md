@@ -2,6 +2,14 @@
 
 Yolk CLI is an easy to use CLI tool used to create and run Oak web applications. The projects created with Yolk CLI are scalable, maintainable, flexible, easy to run, and are batteries-included, with dynamic links to a variety of Deno technologies that are commonly used in web applications, including a template rendering engine, ORM libraries, session middleware, security middleware, logging middleware, and more.
 
+Currently supported Deno versions:
+* 1.0.2
+
+Unsupported Deno Versions:
+* 1.0.3 (Due to TS compiler bug, which was fixed in 1.0.4)
+* 1.0.4 (Due to `BorrowMutError` occuring on some platforms)
+* 1.0.5 (Due to `Uncaught AssertionError: Unexpected skip of the emit` occuring on some platforms)
+
 ## Technology Stack in the Yolk CLI
 
 Projects created with the Yolk CLI include dynamic links to the following technologies, which will be downloaded and cached on the first run of the commands in the CLI:
@@ -80,6 +88,12 @@ Or in file structure tree format:
 ├── config
 │   └── dbconfig.js
 │
+├── deps
+│   ├── oak.js
+│   ├── denjucks.js
+│   ├── ...
+│   └── other dependencies
+│
 ├── server.js
 │
 └── utilities
@@ -91,6 +105,7 @@ As a basic overview of what each file and folder contains:
 * **/applets**: This folder contains all of the applets in this web application. More on applets below.
 * **/config**: This folder contains configuations used throughout your web application. Currently this folder only contains a **dbconfig.js** file which contains exports for configuring your database.
 * **/utilities:**: This folder contains utilities used internally within the application, and you generally won't be modifying files within this folder.
+* **/deps:**: This folder contains imports and exports to all dependencies used by projects created by Yolk. You generally won't need to modify any files in this folder, but you can change a URL in any of these files to upgrade or download a version of a library.
 * **server.js**: This file contains all the configurations for the Oak server. It includes the **routers**, **middleware**, and all basic server configurations (such as the port number chosen, which by default is 55555).
 
 Before looking at the **server.js** and **dbconfig.js** files, lets look at applets, as they make up the core of your web application.
@@ -126,9 +141,9 @@ Let's look further at the individual pieces of an applet.
 * **router.js** contains the routes for this applet. We can see that the router.js file contains a path prefix which determines how the routes will be accessed on the path, a route for serving static files, and then a base route for the router. Also note that the rendering engine (which uses the [Denjucks](https://deno.land/x/denjucks) library), and a controller are imported for this applet. At the bottom of the file this router is exported, and will be used within the `server.js` file:
 
 ```javascript
-import { Router } from "https://deno.land/x/oak/mod.ts";
-import * as path from "https://deno.land/std/path/mod.ts";
-import denjucks from "https://deno.land/x/dinja/lib/denjucks/mod.js";
+import { Router } from "../../deps/oak.js";
+import path from "../../deps/path.js";
+import denjucks from "../../deps/denjucks.js";
 import * as utilities from "../../utilities/util.js"
 import mainController from "./controllers/mainController.js";
 
@@ -144,18 +159,18 @@ const router = new Router({ prefix: pathPrefix });
 
 // Creating the static file route for this router
 router.get("/static/:filePath", async (context) => {
-    const filePath = context.params.filePath;
-    let buffer;
-    try {
-        buffer = await Deno.readFile(path.join(__dirname, "static", filePath));
-    } catch (error) {}
-    
-    return context.response.body = buffer;
+	const filePath = context.params.filePath;
+	let buffer;
+	try {
+		buffer = await Deno.readFile(path.join(__dirname, "static", filePath));
+	} catch (error) {}
+	
+	return context.response.body = buffer;
 });
 
 // Routes
 router.get("/", async (context) => {
-    context.response.body = renderingEngine.render("index.html");
+	context.response.body = renderingEngine.render("index.html");
 });
 
 export default router;
@@ -164,20 +179,20 @@ export default router;
 * **/models** contains files for individual database models used throughout your web application and are typically imported by your controllers. Yolk CLI projects use the [DenoDB](https://deno.land/x/denodb) ORM library by default, and so models are created using this library.
 
 ```javascript
-import { Model, DATA_TYPES } from 'https://deno.land/x/denodb/mod.ts';
+import { Model, DATA_TYPES } from '../../../deps/denodb.js';
 
 export default class Users extends Model {
-    static table = 'mainUsers';
-    static timestamps = true;
+	static table = 'mainUsers';
+	static timestamps = true;
 
-    static fields = {
-        id: {
-            primaryKey: true,
-            autoIncrement: true,
-        },
-        firstname: DATA_TYPES.STRING,
-        lastname: DATA_TYPES.STRING,
-    };
+	static fields = {
+		id: {
+			primaryKey: true,
+			autoIncrement: true,
+		},
+		firstname: DATA_TYPES.STRING,
+		lastname: DATA_TYPES.STRING,
+	};
 }
 ```
 
@@ -201,13 +216,13 @@ yolk migrate
 The **server.js** file contains all of the configurations for the server, the middleware, the database initialization, and the routers contained within all applets:
 
 ```javascript
-import { Application } from "https://deno.land/x/oak/mod.ts";
-import { Database } from 'https://deno.land/x/denodb/mod.ts';
+import { Application } from "./deps/oak.js";
+import { Database } from './deps/denodb.js';
 import { dbconfig } from "./config/dbconfig.js";
-import { queryParserAsync } from "https://raw.githubusercontent.com/denjucks/oak-query-parser-async/master/mod.ts";
-import { Snelm } from "https://deno.land/x/snelm/mod.ts";
-import { Session } from "https://deno.land/x/session/mod.ts";
-import { organ } from "https://deno.land/x/organ/mod.ts";
+import { queryParserAsync } from "./deps/oakAsyncQueryParser.js";
+import { Snelm } from "./deps/snelm.js";
+import { Session } from "./deps/session.js";
+import { organ } from "./deps/organ.js";
 
 const app = new Application();
 
@@ -222,8 +237,8 @@ if (Deno.args[0]) {
 /* Database */
 const database = new Database(dbconfig.client, dbconfig.connection);
 app.use(async (context, next) => {
-    context.database = database;
-    await next();
+	context.database = database;
+	await next();
 });
 
 
@@ -263,6 +278,15 @@ app.use(mainapi.routes());
 app.use(mainapi.allowedMethods());
 
 
+// General 404 Error Page
+app.use(async (context, next) => {
+	context.response.status = 404;
+	context.response.body = "404 - Page Not Found";
+
+	await next();
+});
+
+
 // Starting the server
 console.log("Starting server at port: " + port);
 await app.listen({ port: port });
@@ -273,32 +297,41 @@ In this file you will mainly make changes to the Routers section, adding and rem
 
 #### Database Configuration
 
-Within the `/configs` folder you can configure the database via the **database.js** file. By default Yolk CLI projects use SQLite3 as their database, which is useful for debugging but not the best choice for production applications. You can chose an alternative database using this configuation file. Since the DenoDB library is used for configuration, you can see the documentation [here](https://deno.land/x/denodb) to check out how to modify the configuations for various databases.
+Within the `/configs` folder you can configure the database via the **dbconfig.js** file. By default Yolk CLI projects use SQLite3 as their database, which is useful for debugging but not the best choice for production applications. You can chose an alternative database using this configuation file. Since the DenoDB library is used for configuration, you can see the documentation [here](https://deno.land/x/denodb) to check out how to modify the configuations for various databases.
 
 
 ### Summary of Yolk CLI commands
 
 ```
 Available Commands:
-    createproject
-        "Creates a new project"
+-------------------
+
+    createproject [<dynamic>]
+        | Creates a new project. By default dependencies for a new project
+        | are linked to specific version numbers of that dependency. You can
+        | optionally include the dynamic flag to make all dependencies use
+        | the master branch of their respective repositories.
+
 
     createapplet <applet_name>
-        "Creates an new applet with a specified name"
-    
+        | Creates an new applet with a specified name.
+	
+
     migrate [drop]
-        "Migrates all of the models in all of the applets. Add the drop"
-        "parameter to drop the existing models in the database in the case"
-        "where those models already exist"
+        | Migrates all of the models in all of the applets. Add the drop
+        | parameter to drop the existing models in the database in the case
+        | where those models already exist.
+
 
     run [<port_number>]
-        "Runs the server using denon, restarting the server whenever a file"
-        "in the project is updated. You can change the port number by"
-        "specifying a port number, with the default set to 55555 if no port"
-        "number is chosen"
+        | Runs the server using denon, restarting the server whenever a file
+        | in the project is updated. You can change the port number by
+        | specifying a port number, with the default set to 55555 if no port
+        | number is chosen.
 
-    --help
-        "Displays this help information."
+
+    help
+        | Displays this help information.
 ```
 
 
@@ -314,9 +347,9 @@ Available Commands:
 - [x] Add security middleware (Snelm library)
 - [x] Add query string parsing middleware (Oak-Async-Query-Parser library)
 - [x] Add logging middleware (Organ library)
+- [x] Add default 404 page
 - [ ] Add compression middleware
 - [ ] Add CSRF middleware
-- [ ] Add default 404 page
 - [ ] Improve structure
 
 

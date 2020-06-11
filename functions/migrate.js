@@ -1,10 +1,10 @@
-import * as path from "https://deno.land/std/path/mod.ts";
+import * as path from "https://deno.land/std@0.56.0/path/mod.ts";
 import { crossPlatformPathConversion } from "../utils/crossPlatformPathConversion.js";
 
 export async function migrate(drop) {
     let denodb = await import('https://deno.land/x/denodb/' + 'mod.ts');
     const Database = denodb.Database;
-	const path = await import("https://deno.land/std/path/" + "mod.ts")
+	const path = await import("https://deno.land/std@0.56.0/path/" + "mod.ts")
 
     const __dirname = crossPlatformPathConversion(Deno.cwd());
 

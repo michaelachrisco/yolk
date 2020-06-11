@@ -2,7 +2,7 @@ import { dedent } from "../utils/dedent.js";
 import { existsSync } from "../utils/existsSync.js";
 
 export async function createapplet(appletName) {
-	const path = await import("https://deno.land/std/path/" + "mod.ts")
+	const path = await import("https://deno.land/std@0.56.0/path/" + "mod.ts")
 	const appletDir = path.join("applets", appletName); 
 	
 	if (existsSync(appletDir)) {
@@ -215,9 +215,9 @@ export async function createapplet(appletName) {
 	
 	
 	Deno.writeTextFile(path.join(appletDir, "router.js"), dedent(`
-		import { Router } from "https://deno.land/x/oak/mod.ts";
-		import * as path from "https://deno.land/std/path/mod.ts";
-		import denjucks from "https://deno.land/x/dinja/lib/denjucks/mod.js";
+		import { Router } from "../../deps/oak.js";
+		import path from "../../deps/path.js";
+		import denjucks from "../../deps/denjucks.js";
 		import * as utilities from "../../utilities/util.js"
 		import mainController from "./controllers/mainController.js";
 		
@@ -253,7 +253,7 @@ export async function createapplet(appletName) {
 	Deno.mkdirSync(path.join(appletDir, "models"));
 
 	Deno.writeTextFile(path.join(appletDir, "models", "users.js"), dedent(`
-		import { Model, DATA_TYPES } from 'https://deno.land/x/denodb/mod.ts';
+		import { Model, DATA_TYPES } from '../../../deps/denodb.js';
 
 		export default class Users extends Model {
 			static table = '${appletName}Users';
@@ -273,7 +273,7 @@ export async function createapplet(appletName) {
 	Deno.mkdirSync(path.join(appletDir, "api"));
 
 	Deno.writeTextFile(path.join(appletDir, "api", "router.js"), dedent(`
-		import { Router } from "https://deno.land/x/oak/mod.ts";
+		import { Router } from "../../../deps/oak.js";
 		import mainController from "../controllers/mainController.js";
 		
 		// Setting the path prefix for this api and creating the router

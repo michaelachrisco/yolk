@@ -1,17 +1,17 @@
 import { dedent } from "../utils/dedent.js";
 import { createapplet } from "./createapplet.js";
 
-export async function createproject() {
+export async function createproject(dependenciesFlag) {
 	const path = await import("https://deno.land/std/path/" + "mod.ts")
 
 	Deno.writeTextFile("server.js", dedent(`
-		import { Application } from "https://deno.land/x/oak/mod.ts";
-		import { Database } from 'https://deno.land/x/denodb/mod.ts';
+		import { Application } from "./deps/oak.js";
+		import { Database } from './deps/denodb.js';
 		import { dbconfig } from "./config/dbconfig.js";
-		import { queryParserAsync } from "https://raw.githubusercontent.com/denjucks/oak-query-parser-async/master/mod.ts";
-		import { Snelm } from "https://deno.land/x/snelm/mod.ts";
-		import { Session } from "https://deno.land/x/session/mod.ts";
-		import { organ } from "https://deno.land/x/organ/mod.ts";
+		import { queryParserAsync } from "./deps/oakAsyncQueryParser.js";
+		import { Snelm } from "./deps/snelm.js";
+		import { Session } from "./deps/session.js";
+		import { organ } from "./deps/organ.js";
 
 		const app = new Application();
 		
@@ -65,8 +65,17 @@ export async function createproject() {
 		import mainapi from "./applets/main/api/router.js";
 		app.use(mainapi.routes());
 		app.use(mainapi.allowedMethods());
+
+
+		// General 404 Error Page
+		app.use(async (context, next) => {
+			context.response.status = 404;
+			context.response.body = "404 - Page Not Found";
+
+			await next();
+		});
 		
-		
+
 		// Starting the server
 		console.log("Starting server at port: " + port);
 		await app.listen({ port: port });
@@ -97,6 +106,80 @@ export async function createproject() {
 			return filePath
 		}
 	`));
+
+	Deno.mkdirSync("deps");
+	
+	if (dependenciesFlag === "dynamic") {
+		Deno.writeTextFile(path.join("deps", "denjucks.js"), dedent(`
+			import denjucks from "https://deno.land/x/denjucks/mod.js";
+			export default denjucks;
+		`));
+
+		Deno.writeTextFile(path.join("deps", "denodb.js"), dedent(`
+			export { Database, Model, DATA_TYPES } from 'https://deno.land/x/denodb/mod.ts';
+		`));
+
+		Deno.writeTextFile(path.join("deps", "oak.js"), dedent(`
+			export { Application, Router } from "https://deno.land/x/oak/mod.ts";
+		`));
+
+		Deno.writeTextFile(path.join("deps", "oakAsyncQueryParser.js"), dedent(`
+			export { queryParserAsync } from "https://raw.githubusercontent.com/denjucks/oak-query-parser-async/master/mod.ts";
+		`));
+
+		Deno.writeTextFile(path.join("deps", "organ.js"), dedent(`
+			export { organ } from "https://deno.land/x/organ/mod.ts";
+		`));
+
+		Deno.writeTextFile(path.join("deps", "path.js"), dedent(`
+			import * as path from "https://deno.land/std/path/mod.ts";
+			export default path;
+		`));
+
+		Deno.writeTextFile(path.join("deps", "session.js"), dedent(`
+			export { Session } from "https://deno.land/x/session/mod.ts";
+		`));
+
+		Deno.writeTextFile(path.join("deps", "snelm.js"), dedent(`
+			export { Snelm } from "https://deno.land/x/snelm/mod.ts";
+		`));
+
+
+	} else {
+		Deno.writeTextFile(path.join("deps", "denjucks.js"), dedent(`
+			import denjucks from "https://deno.land/x/denjucks@1.1.1/mod.js";
+			export default denjucks;
+		`));
+
+		Deno.writeTextFile(path.join("deps", "denodb.js"), dedent(`
+			export { Database, Model, DATA_TYPES } from 'https://deno.land/x/denodb/mod.ts';
+		`));
+
+		Deno.writeTextFile(path.join("deps", "oak.js"), dedent(`
+			export { Application, Router } from "https://deno.land/x/oak@v5.1.1/mod.ts";
+		`));
+
+		Deno.writeTextFile(path.join("deps", "oakAsyncQueryParser.js"), dedent(`
+			export { queryParserAsync } from "https://raw.githubusercontent.com/denjucks/oak-query-parser-async/1.0.0/mod.ts";
+		`));
+
+		Deno.writeTextFile(path.join("deps", "organ.js"), dedent(`
+			export { organ } from "https://deno.land/x/organ@1.0.0/mod.ts";
+		`));
+
+		Deno.writeTextFile(path.join("deps", "path.js"), dedent(`
+			import * as path from "https://deno.land/std@0.56.0/path/mod.ts";
+			export default path;
+		`));
+
+		Deno.writeTextFile(path.join("deps", "session.js"), dedent(`
+			export { Session } from "https://deno.land/x/session@1.1.0/mod.ts";
+		`));
+
+		Deno.writeTextFile(path.join("deps", "snelm.js"), dedent(`
+			export { Snelm } from "https://deno.land/x/snelm@1.2.0/mod.ts";
+		`));
+	}
 	
 	await createapplet("main");
 }
