@@ -152,7 +152,7 @@ export async function createproject(dependenciesFlag) {
 		`));
 
 		Deno.writeTextFile(path.join("deps", "denodb.js"), dedent(`
-			export { Database, Model, DATA_TYPES } from 'https://deno.land/x/denodb/mod.ts';
+			export { Database, Model, DATA_TYPES } from 'https://raw.githubusercontent.com/eveningkid/denodb/afa87202bfde36aeab303a3317fc249c8f92e896/mod.ts';
 		`));
 
 		Deno.writeTextFile(path.join("deps", "oak.js"), dedent(`
