@@ -3,6 +3,8 @@ import { createapplet } from "./functions/createapplet.js";
 import { migrate } from "./functions/migrate.js";
 import { rundenon } from "./functions/denon.js";
 
+import * as colors from "https://deno.land/std@0.55.0/fmt/colors.ts";
+
 function red(str) {
 	const run = (str, code) => {
 		return `${code.open}${str.replace(code.regexp, code.open)}${code.close}`
@@ -63,38 +65,38 @@ switch (command) {
 		}
 
 		console.log(`
-Yolk CLI - Oak-Based, Batteries-Included
+${colors.yellow("Yolk CLI")} - Oak-Based, Batteries-Included
 Copyright 2020 - Anthony Mancini
 Licensed under an MIT license
 
 Available Commands:
 -------------------
 
-    createproject [<dynamic>]
+    ${colors.yellow("createproject [<dynamic>]")}
         | Creates a new project. By default dependencies for a new project
         | are linked to specific version numbers of that dependency. You can
         | optionally include the dynamic flag to make all dependencies use
         | the master branch of their respective repositories.
 
 
-    createapplet <applet_name>
+    ${colors.yellow("createapplet <applet_name>")}
         | Creates an new applet with a specified name.
 	
 
-    migrate [drop]
+    ${colors.yellow("migrate [drop]")}
         | Migrates all of the models in all of the applets. Add the drop
         | parameter to drop the existing models in the database in the case
         | where those models already exist.
 
 
-    run [<port_number>]
+    ${colors.yellow("run [<port_number>]")}
         | Runs the server using denon, restarting the server whenever a file
         | in the project is updated. You can change the port number by
         | specifying a port number, with the default set to 55555 if no port
         | number is chosen.
 
 
-    help
+    ${colors.yellow("help")}
         | Displays this help information.
 `.trim() + "\n" + red(helpText));
 		
