@@ -4,6 +4,7 @@ Yolk CLI is an easy to use CLI tool used to create and run Oak web applications.
 
 Currently supported Deno versions:
 * **1.0.2**
+* **1.1.0**
 
 Unsupported Deno Versions:
 * **1.0.3** (Due to TS compiler bug, which was fixed in 1.0.4)

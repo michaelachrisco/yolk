@@ -40,7 +40,6 @@ export async function createproject(dependenciesFlag) {
 		
 		// Security Middleware
 		const snelm = new Snelm("oak");
-		await snelm.init();
 		
 		app.use(async (context, next) => {
 		    context.response = snelm.snelm(context.request, context.response);
@@ -164,7 +163,7 @@ export async function createproject(dependenciesFlag) {
 		`));
 
 		Deno.writeTextFile(path.join("deps", "organ.js"), dedent(`
-			export { organ } from "https://deno.land/x/organ@1.0.0/mod.ts";
+			export { organ } from "https://deno.land/x/organ@1.1.1/mod.ts";
 		`));
 
 		Deno.writeTextFile(path.join("deps", "path.js"), dedent(`
@@ -177,7 +176,7 @@ export async function createproject(dependenciesFlag) {
 		`));
 
 		Deno.writeTextFile(path.join("deps", "snelm.js"), dedent(`
-			export { Snelm } from "https://deno.land/x/snelm@1.2.0/mod.ts";
+			export { Snelm } from "https://deno.land/x/snelm@1.3.0/mod.ts";
 		`));
 	}
 	
