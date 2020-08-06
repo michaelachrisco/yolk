@@ -167,7 +167,7 @@ export async function createproject(dependenciesFlag) {
 		`));
 
 		Deno.writeTextFile(path.join("deps", "path.js"), dedent(`
-			import * as path from "https://deno.land/std@0.56.0/path/mod.ts";
+			import * as path from "https://deno.land/std@0.63.0/path/mod.ts";
 			export default path;
 		`));
 

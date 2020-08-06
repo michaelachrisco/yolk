@@ -3,7 +3,7 @@ import { createapplet } from "./functions/createapplet.js";
 import { migrate } from "./functions/migrate.js";
 import { rundenon } from "./functions/denon.js";
 
-import * as colors from "https://deno.land/std@0.55.0/fmt/colors.ts";
+import * as colors from "https://deno.land/std@0.63.0/fmt/colors.ts";
 
 function red(str) {
 	const run = (str, code) => {
